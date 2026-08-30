@@ -30,6 +30,7 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
     expandedImage: document.querySelector("#expanded-image"),
     expandedName: document.querySelector("#expanded-name"),
     expandedMeta: document.querySelector("#expanded-meta"),
+    expandedNote: document.querySelector("#expanded-note"),
     expandedZoomOptions: document.querySelector("#expanded-zoom-options"),
   };
 
@@ -46,6 +47,9 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
   const scopes = buildScopes(imageFiles, (filename) => {
     console.warn(`Skipped image with an unrecognized filename: ${filename}`);
   });
+  const scopeNotes = new Map([
+    [1, "Sniper rifle exception: iron sights cost 15 points and have no scope glint."],
+  ]);
 
   function readPreference(key, fallback) {
     try {
@@ -245,6 +249,12 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
     card.querySelector(".point-badge").textContent = `${scope.points} PTS`;
     card.querySelector(".scope-name").textContent = scope.name;
     card.querySelector(".scope-name").title = scope.name;
+    const note = scopeNotes.get(scope.id);
+    if (note) {
+      const noteElement = card.querySelector(".scope-note");
+      noteElement.textContent = note;
+      noteElement.hidden = false;
+    }
 
     if (scope.views.length > 1) {
       for (const view of scope.views) {
@@ -385,6 +395,9 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
 
   function openExpanded(scope, view) {
     elements.expandedName.textContent = scope.name;
+    const note = scopeNotes.get(scope.id);
+    elements.expandedNote.textContent = note || "";
+    elements.expandedNote.hidden = !note;
 
     const zoomButtons = scope.views.length > 1
       ? scope.views.map((scopeView) => {

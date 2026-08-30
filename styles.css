@@ -397,6 +397,10 @@ dd {
   margin-bottom: 5px;
 }
 
+.scope-grid[data-view="compact"] .scope-note {
+  margin: 4px 0 9px;
+}
+
 .scope-grid[data-view="compact"] .zoom-options {
   display: none;
 }
@@ -492,6 +496,15 @@ dd {
 
 .scope-title-row {
   margin-bottom: 20px;
+}
+
+.scope-note {
+  margin: -9px 0 16px;
+  padding-left: 9px;
+  border-left: 2px solid var(--accent);
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
 }
 
 .scope-name {
@@ -834,6 +847,11 @@ dialog::backdrop {
 
 #expanded-name {
   font-weight: 800;
+}
+
+#expanded-note {
+  color: var(--muted);
+  font-size: 0.7rem;
 }
 
 .expanded-zoom-options {
