@@ -1,6 +1,6 @@
 // Generated from the images directory. Run `npm run manifest` after adding images.
 window.BF6_SCOPE_IMAGES = [
-  "01-basic_sight[5].png",
+  "01-basic_sight_1.6x[5].png",
   "02-mini_flex_1.00x[10].png",
   "03-r-mr_1.00x[10].png",
   "04-osa-7_1.00x[10].png",

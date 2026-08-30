@@ -1,4 +1,4 @@
-import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
+import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
 
 (() => {
   "use strict";
@@ -9,6 +9,8 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
     resultsCount: document.querySelector("#results-count"),
     search: document.querySelector("#search"),
     pointOptions: document.querySelector("#point-options"),
+    magnificationOptions: document.querySelector("#magnification-options"),
+    sniperToggle: document.querySelector("#sniper-toggle"),
     sort: document.querySelector("#sort-select"),
     viewOptions: document.querySelector("#view-options"),
     pictureSize: document.querySelector("#picture-size"),
@@ -36,8 +38,10 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
 
   const state = {
     query: "",
-    points: "all",
-    sort: "id",
+    points: new Set(),
+    magnifications: new Set(),
+    showSniperScopes: true,
+    sort: "default",
     selected: [],
     activeViews: new Map(),
     view: readPreference("bf6-scopes-view", "compact"),
@@ -50,6 +54,11 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
   const scopeNotes = new Map([
     [1, "Sniper rifle exception: iron sights cost 15 points and have no scope glint."],
   ]);
+  const SNIPER_SCOPE_MIN_ZOOM = 6;
+
+  function isSniperOnly(scope) {
+    return scope.maxZoom >= SNIPER_SCOPE_MIN_ZOOM;
+  }
 
   function readPreference(key, fallback) {
     try {
@@ -92,7 +101,16 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
 
   function activeViewFor(scope) {
     const filename = state.activeViews.get(scope.key);
-    return scope.views.find((view) => view.filename === filename) || scope.views[0];
+    const activeView = scope.views.find((view) => view.filename === filename);
+
+    if (state.magnifications.size > 0) {
+      const matchingView = scope.views.find((view) =>
+        state.magnifications.has(view.zoom ?? 1),
+      );
+      if (!activeView || !state.magnifications.has(activeView.zoom ?? 1)) return matchingView || scope.views[0];
+    }
+
+    return activeView || scope.views[0];
   }
 
   function buildPointFilters() {
@@ -108,35 +126,104 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
       button.className = "filter-chip";
       button.dataset.points = option.value;
       button.textContent = option.label;
-      button.setAttribute("aria-pressed", String(option.value === state.points));
+      button.setAttribute("aria-pressed", String(option.value === "all"));
       button.addEventListener("click", () => {
-        state.points = option.value;
-        for (const chip of elements.pointOptions.querySelectorAll(".filter-chip")) {
-          chip.setAttribute("aria-pressed", String(chip === button));
+        if (option.value === "all") {
+          state.points.clear();
+        } else {
+          const points = Number(option.value);
+          if (state.points.has(points)) {
+            state.points.delete(points);
+          } else {
+            state.points.add(points);
+          }
         }
+        syncPointFilterButtons();
         renderCatalog();
       });
       elements.pointOptions.append(button);
     }
   }
 
+  function syncPointFilterButtons() {
+    for (const chip of elements.pointOptions.querySelectorAll(".filter-chip")) {
+      const isAll = chip.dataset.points === "all";
+      const isPressed = isAll ? state.points.size === 0 : state.points.has(Number(chip.dataset.points));
+      chip.setAttribute("aria-pressed", String(isPressed));
+    }
+  }
+
+  function buildMagnificationFilters() {
+    const magnifications = [
+      ...new Set(scopes.flatMap((scope) => scope.views.map((view) => view.zoom ?? 1))),
+    ].sort((a, b) => a - b);
+    const options = [
+      { value: "all", label: "All" },
+      ...magnifications.map((zoom) => ({ value: String(zoom), label: formatZoom(zoom) })),
+    ];
+
+    for (const option of options) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "filter-chip";
+      button.dataset.magnification = option.value;
+      button.textContent = option.label;
+      button.setAttribute("aria-pressed", String(option.value === "all"));
+      button.addEventListener("click", () => {
+        if (option.value === "all") {
+          state.magnifications.clear();
+        } else {
+          const magnification = Number(option.value);
+          if (state.magnifications.has(magnification)) {
+            state.magnifications.delete(magnification);
+          } else {
+            state.magnifications.add(magnification);
+          }
+        }
+        syncMagnificationFilterButtons();
+        renderCatalog();
+      });
+      elements.magnificationOptions.append(button);
+    }
+  }
+
+  function syncMagnificationFilterButtons() {
+    for (const chip of elements.magnificationOptions.querySelectorAll(".filter-chip")) {
+      const isAll = chip.dataset.magnification === "all";
+      const isPressed = isAll
+        ? state.magnifications.size === 0
+        : state.magnifications.has(Number(chip.dataset.magnification));
+      chip.setAttribute("aria-pressed", String(isPressed));
+    }
+  }
+
   function filteredScopes() {
     const query = state.query.trim().toLowerCase();
     const result = scopes.filter((scope) => {
-      const matchesPoints = state.points === "all" || scope.points === Number(state.points);
+      const matchesPoints = state.points.size === 0 || state.points.has(scope.points);
+      const matchesMagnification =
+        state.magnifications.size === 0 ||
+        scope.views.some((view) => state.magnifications.has(view.zoom ?? 1));
       const matchesQuery = !query || scope.name.toLowerCase().includes(query);
-      return matchesPoints && matchesQuery;
+      const matchesSniperFilter = state.showSniperScopes || !isSniperOnly(scope);
+      return matchesPoints && matchesMagnification && matchesQuery && matchesSniperFilter;
     });
 
     const comparators = {
-      id: (a, b) => a.id - b.id || a.name.localeCompare(b.name),
+      default: (a, b) =>
+        Number(b.id === 1) - Number(a.id === 1) ||
+        Number(isSniperOnly(a)) - Number(isSniperOnly(b)) ||
+        a.points - b.points ||
+        a.minZoom - b.minZoom ||
+        a.maxZoom - b.maxZoom ||
+        a.id - b.id,
       "zoom-asc": (a, b) => a.minZoom - b.minZoom || a.id - b.id,
       "zoom-desc": (a, b) => b.maxZoom - a.maxZoom || a.id - b.id,
       points: (a, b) => a.points - b.points || a.id - b.id,
       name: (a, b) => a.name.localeCompare(b.name),
     };
 
-    return result.sort(comparators[state.sort] || comparators.id);
+    return result.sort(comparators[state.sort] || comparators.default);
   }
 
   function selectedIndex(filename) {
@@ -217,8 +304,8 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
     button.classList.toggle("is-selected", isSelected);
     button.setAttribute("aria-pressed", String(isSelected));
     button.innerHTML = isSelected
-      ? '<span aria-hidden="true">+</span> Remove'
-      : '<span aria-hidden="true">+</span> Compare';
+      ? '<span class="compare-icon" aria-hidden="true">×</span><span>Remove</span>'
+      : '<span class="compare-icon" aria-hidden="true">+</span><span>Compare</span>';
   }
 
   function setCardView(card, scope, view) {
@@ -228,7 +315,9 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
     image.src = view.src;
     image.alt = `${scope.name} sight picture at ${formatZoom(view.zoom)}`;
     image.onload = () => image.classList.remove("is-changing");
-    card.querySelector(".active-zoom").textContent = formatZoom(view.zoom);
+    const zoom = formatZoom(view.zoom);
+    card.querySelector(".active-zoom").setAttribute("aria-label", `Magnification ${zoom}`);
+    card.querySelector(".active-zoom-value").textContent = zoom;
 
     for (const button of card.querySelectorAll(".zoom-button")) {
       button.setAttribute("aria-pressed", String(button.dataset.filename === view.filename));
@@ -249,6 +338,7 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
     card.querySelector(".point-badge").textContent = `${scope.points} PTS`;
     card.querySelector(".scope-name").textContent = scope.name;
     card.querySelector(".scope-name").title = scope.name;
+    card.querySelector(".sniper-badge").hidden = !isSniperOnly(scope);
     const note = scopeNotes.get(scope.id);
     if (note) {
       const noteElement = card.querySelector(".scope-note");
@@ -349,27 +439,75 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
     elements.trayItems.replaceChildren(...items);
   }
 
+  function updateComparePanel(panel, scope, view) {
+    const image = panel.querySelector("img");
+    image.src = view.src;
+    image.alt = `${view.name} sight picture at ${formatZoom(view.zoom)}`;
+    panel.querySelector(".compare-panel-name").textContent = view.name;
+    panel.querySelector(".compare-panel-meta").textContent =
+      `${formatZoom(view.zoom)} · ${view.points} PTS${isSniperOnly(scope) ? " · SNIPER ONLY" : ""}`;
+
+    for (const button of panel.querySelectorAll(".compare-zoom-options .zoom-button")) {
+      button.setAttribute("aria-pressed", String(button.dataset.filename === view.filename));
+    }
+  }
+
+  function setComparisonView(panel, selectionIndex, scope, view) {
+    state.selected[selectionIndex] = view;
+    state.activeViews.set(scope.key, view.filename);
+    updateComparePanel(panel, scope, view);
+
+    const visibleCard = [...elements.grid.querySelectorAll(".scope-card")].find(
+      (card) => card.dataset.scopeKey === scope.key,
+    );
+    if (visibleCard) setCardView(visibleCard, scope, view);
+
+    updateShareUrl();
+    renderCompareTray();
+    updateVisibleCardSelections();
+  }
+
   function openComparison() {
     if (state.selected.length !== 2) return;
 
-    const panels = state.selected.map((view) => {
+    const panels = state.selected.map((view, selectionIndex) => {
+      const scope = scopes.find((item) => item.key === view.key);
       const figure = document.createElement("figure");
       figure.className = "compare-panel";
       const imageWrap = document.createElement("div");
       imageWrap.className = "compare-panel-image";
       const image = document.createElement("img");
-      image.src = view.src;
-      image.alt = `${view.name} sight picture at ${formatZoom(view.zoom)}`;
       const caption = document.createElement("figcaption");
+      const details = document.createElement("div");
+      details.className = "compare-panel-details";
       const name = document.createElement("span");
       name.className = "compare-panel-name";
-      name.textContent = view.name;
       const meta = document.createElement("span");
       meta.className = "compare-panel-meta";
-      meta.textContent = `${formatZoom(view.zoom)} · ${view.points} PTS`;
+      const zoomOptions = document.createElement("div");
+      zoomOptions.className = "compare-zoom-options";
+      zoomOptions.setAttribute("aria-label", `Magnification for ${view.name}`);
+
+      if (scope?.views.length > 1) {
+        for (const scopeView of scope.views) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "zoom-button";
+          button.dataset.filename = scopeView.filename;
+          button.textContent = formatZoom(scopeView.zoom);
+          button.setAttribute("aria-label", `Compare ${scope.name} at ${formatZoom(scopeView.zoom)}`);
+          button.addEventListener("click", () =>
+            setComparisonView(figure, selectionIndex, scope, scopeView),
+          );
+          zoomOptions.append(button);
+        }
+      }
+
       imageWrap.append(image);
-      caption.append(name, meta);
+      details.append(name, meta);
+      caption.append(details, zoomOptions);
       figure.append(imageWrap, caption);
+      updateComparePanel(figure, scope, view);
       return figure;
     });
 
@@ -381,7 +519,7 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
     state.activeViews.set(scope.key, view.filename);
     elements.expandedImage.src = view.src;
     elements.expandedImage.alt = `${scope.name} sight picture at ${formatZoom(view.zoom)}`;
-    elements.expandedMeta.textContent = `${formatZoom(view.zoom)} · ${scope.points} PTS`;
+    elements.expandedMeta.textContent = `${formatZoom(view.zoom)} · ${scope.points} PTS${isSniperOnly(scope) ? " · SNIPER ONLY" : ""}`;
 
     for (const button of elements.expandedZoomOptions.querySelectorAll(".zoom-button")) {
       button.setAttribute("aria-pressed", String(button.dataset.filename === view.filename));
@@ -445,15 +583,25 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
     applyDisplaySettings();
   });
 
+  elements.sniperToggle.addEventListener("click", () => {
+    state.showSniperScopes = !state.showSniperScopes;
+    elements.sniperToggle.setAttribute("aria-pressed", String(state.showSniperScopes));
+    elements.sniperToggle.textContent = state.showSniperScopes ? "Shown" : "Hidden";
+    renderCatalog();
+  });
+
   elements.clearFilters.addEventListener("click", () => {
     state.query = "";
-    state.points = "all";
-    state.sort = "id";
+    state.points.clear();
+    state.magnifications.clear();
+    state.showSniperScopes = true;
+    state.sort = "default";
     elements.search.value = "";
-    elements.sort.value = "id";
-    for (const chip of elements.pointOptions.querySelectorAll(".filter-chip")) {
-      chip.setAttribute("aria-pressed", String(chip.dataset.points === "all"));
-    }
+    elements.sort.value = "default";
+    elements.sniperToggle.setAttribute("aria-pressed", "true");
+    elements.sniperToggle.textContent = "Shown";
+    syncPointFilterButtons();
+    syncMagnificationFilterButtons();
     renderCatalog();
   });
 
@@ -478,6 +626,7 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=3";
   });
 
   buildPointFilters();
+  buildMagnificationFilters();
   loadComparisonFromUrl();
   applyDisplaySettings();
   renderCatalog();

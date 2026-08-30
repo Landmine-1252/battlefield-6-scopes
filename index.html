@@ -10,9 +10,9 @@
     <meta name="theme-color" content="#11140f" />
     <title>Battlefield 6 Scopes</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=5" />
     <script src="scopes-data.js" defer></script>
-    <script src="app.js" type="module"></script>
+    <script src="app.js?v=9" type="module"></script>
   </head>
   <body>
     <header class="site-header">
@@ -49,15 +49,27 @@
             <input id="search" type="search" placeholder="Search by scope name…" autocomplete="off" />
           </label>
 
-          <fieldset class="point-filter">
-            <legend>Attachment points</legend>
-            <div id="point-options" class="filter-chips"></div>
+          <div class="catalog-filter-groups">
+            <fieldset class="point-filter">
+              <legend>Attachment points</legend>
+              <div id="point-options" class="filter-chips"></div>
+            </fieldset>
+
+            <fieldset class="magnification-filter">
+              <legend>Magnification</legend>
+              <div id="magnification-options" class="filter-chips"></div>
+            </fieldset>
+          </div>
+
+          <fieldset class="sniper-filter">
+            <legend>Sniper scopes</legend>
+            <button id="sniper-toggle" class="filter-chip" type="button" aria-pressed="true">Shown</button>
           </fieldset>
 
           <label class="select-field">
             <span>Sort by</span>
             <select id="sort-select">
-              <option value="id">Default order</option>
+              <option value="default">Game order (points)</option>
               <option value="zoom-asc">Zoom: low to high</option>
               <option value="zoom-desc">Zoom: high to low</option>
               <option value="points">Points: low to high</option>
@@ -86,13 +98,16 @@
           </div>
         </div>
 
-        <p class="results-count" id="results-count" aria-live="polite"></p>
+        <div class="catalog-status">
+          <p class="sniper-legend"><span aria-hidden="true">SR</span> 6×+ scopes are sniper-rifle only</p>
+          <p class="results-count" id="results-count" aria-live="polite"></p>
+        </div>
         <div id="scope-grid" class="scope-grid"></div>
 
         <div id="empty-state" class="empty-state" hidden>
           <p class="empty-reticle" aria-hidden="true">+</p>
           <h3>No scopes acquired</h3>
-          <p>Try a different search or point value.</p>
+          <p>Try a different search, point value, or magnification.</p>
           <button id="clear-filters" class="text-button" type="button">Clear filters</button>
         </div>
       </section>
@@ -138,23 +153,37 @@
         <div class="scope-image-wrap">
           <img class="scope-image" alt="" loading="lazy" decoding="async" />
           <div class="image-topline">
+            <div class="image-actions">
+              <button class="compare-button" type="button">
+                <span class="compare-icon" aria-hidden="true">+</span><span>Compare</span>
+              </button>
+              <span
+                class="sniper-badge"
+                title="Sniper-rifle only: this scope reaches 6× or higher"
+                aria-label="Sniper-rifle only: this scope reaches 6× or higher"
+                tabindex="0"
+                hidden
+              >SR</span>
+            </div>
             <span class="point-badge"></span>
           </div>
           <button class="expand-button" type="button" aria-label="Open full-size sight picture">
-            <span aria-hidden="true">⛶</span>
+            <svg class="expand-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"></path>
+            </svg>
           </button>
         </div>
         <div class="scope-card-body">
           <div class="scope-title-row">
             <h3 class="scope-name"></h3>
-            <span class="active-zoom"></span>
+            <span class="active-zoom">
+              <span class="active-zoom-label" aria-hidden="true">Magnification</span>
+              <strong class="active-zoom-value"></strong>
+            </span>
           </div>
           <p class="scope-note" hidden></p>
           <div class="scope-controls">
             <div class="zoom-options" aria-label="Available zoom levels"></div>
-            <button class="compare-button" type="button">
-              <span aria-hidden="true">+</span> Compare
-            </button>
           </div>
         </div>
       </article>

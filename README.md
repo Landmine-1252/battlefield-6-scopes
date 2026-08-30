@@ -4,7 +4,17 @@ A static visual reference for comparing Battlefield 6 scopes, zoom levels, and a
 
 Selecting two sight pictures updates the page URL with repeated `compare` query parameters. The comparison dialog includes a **Copy link** button, and opening a shared URL restores both selections automatically.
 
-The catalog defaults to Compact view and also includes Cards and borderless Images views. A picture-size slider changes the grid density, and the selected layout is remembered in the browser. Click a picture to enlarge it, then click the enlarged picture again to close it.
+Variable scopes include magnification controls on each side of the comparison dialog. Changing either side updates the selected sight picture and its shareable URL parameter.
+
+The catalog defaults to Compact view and also includes Cards and borderless Images views. A picture-size slider changes the grid density, and the selected layout is remembered in the browser. Variable scopes expose their available zoom views directly in Compact and Cards views. Click a picture to enlarge it, then click the enlarged picture again to close it.
+
+Scopes that reach **6× or higher** are marked `SR` because they are restricted to sniper rifles. Hover or focus the badge for an explanation; enlarged and comparison views also show the restriction.
+
+Attachment-point filters can be combined, so users can show sets such as 5+10 or 10+20 points. Selecting **All** clears the point selections. A separate Sniper scopes toggle shows or hides every `SR` scope.
+
+Magnification filters can also be combined. Selecting a magnification shows scopes with a sight picture at that level; for variable scopes, the matching sight picture is selected automatically.
+
+The default catalog order always pins organizational ID `01` (Basic Sight) first, then follows the in-game attachment-point progression. Regular scopes are grouped before sniper-only scopes; each group is sorted by points, then by magnification.
 
 ## Image naming
 
