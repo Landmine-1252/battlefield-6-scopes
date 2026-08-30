@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="View and compare Battlefield 6 scope sight pictures, magnification, and attachment point costs."
+    />
+    <meta name="theme-color" content="#11140f" />
+    <title>Battlefield 6 Scopes</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="scopes-data.js" defer></script>
+    <script src="app.js" type="module"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-identity">
+        <h1 class="site-title" id="site-title">
+          <a class="brand" href="#top" aria-label="Battlefield 6 Scopes home">
+            <span class="brand-mark" aria-hidden="true"></span>
+            <span>BATTLEFIELD 6 SCOPES</span>
+          </a>
+        </h1>
+        <p class="header-description">
+          View scope sight pictures the game does not preview, or compare two side by side.
+        </p>
+      </div>
+      <a
+        class="github-link"
+        href="https://github.com/Landmine-1252/battlefield-6-scopes"
+        target="_blank"
+        rel="noreferrer"
+      >
+        View source <span aria-hidden="true">↗</span>
+      </a>
+    </header>
+
+    <main id="top">
+      <section class="catalog" aria-label="Scope catalog">
+        <div class="filters" aria-label="Scope filters">
+          <label class="search-field">
+            <span class="visually-hidden">Search scopes</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="6.5"></circle>
+              <path d="m16 16 4 4"></path>
+            </svg>
+            <input id="search" type="search" placeholder="Search by scope name…" autocomplete="off" />
+          </label>
+
+          <fieldset class="point-filter">
+            <legend>Attachment points</legend>
+            <div id="point-options" class="filter-chips"></div>
+          </fieldset>
+
+          <label class="select-field">
+            <span>Sort by</span>
+            <select id="sort-select">
+              <option value="id">Default order</option>
+              <option value="zoom-asc">Zoom: low to high</option>
+              <option value="zoom-desc">Zoom: high to low</option>
+              <option value="points">Points: low to high</option>
+              <option value="name">Name: A–Z</option>
+            </select>
+          </label>
+
+          <div class="display-controls">
+            <fieldset class="view-filter">
+              <legend>View</legend>
+              <div class="view-options" id="view-options">
+                <button class="view-button" type="button" data-view="cards" aria-pressed="false">Cards</button>
+                <button class="view-button" type="button" data-view="compact" aria-pressed="true">Compact</button>
+                <button class="view-button" type="button" data-view="images" aria-pressed="false">Images</button>
+              </div>
+            </fieldset>
+
+            <div class="size-field">
+              <label for="picture-size">Picture size</label>
+              <div class="size-slider">
+                <span aria-hidden="true">−</span>
+                <input id="picture-size" type="range" min="120" max="520" step="20" value="340" />
+                <span aria-hidden="true">+</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="results-count" id="results-count" aria-live="polite"></p>
+        <div id="scope-grid" class="scope-grid"></div>
+
+        <div id="empty-state" class="empty-state" hidden>
+          <p class="empty-reticle" aria-hidden="true">+</p>
+          <h3>No scopes acquired</h3>
+          <p>Try a different search or point value.</p>
+          <button id="clear-filters" class="text-button" type="button">Clear filters</button>
+        </div>
+      </section>
+    </main>
+
+    <aside id="compare-tray" class="compare-tray" aria-label="Selected scopes" hidden>
+      <div class="compare-tray-copy">
+        <span class="tray-label">COMPARE</span>
+        <span id="tray-summary">Choose two sight pictures</span>
+      </div>
+      <div id="tray-items" class="tray-items"></div>
+      <div class="tray-actions">
+        <button id="clear-compare" class="button button-quiet" type="button">Clear</button>
+        <button id="copy-compare" class="button button-quiet" type="button" disabled>Copy link</button>
+        <button id="open-compare" class="button button-primary" type="button" disabled>
+          Compare <span aria-hidden="true">↗</span>
+        </button>
+      </div>
+    </aside>
+
+    <dialog id="compare-dialog" class="compare-dialog">
+      <form method="dialog" class="dialog-bar">
+        <div>
+          <h2>Compare sight pictures</h2>
+        </div>
+        <div class="dialog-actions">
+          <button id="dialog-copy-compare" class="button button-quiet" type="button">Copy link</button>
+          <button class="close-button" value="close" aria-label="Close comparison">×</button>
+        </div>
+      </form>
+      <div id="compare-panels" class="compare-panels"></div>
+    </dialog>
+
+    <p id="share-status" class="visually-hidden" aria-live="polite"></p>
+
+    <footer>
+      <p>Community-made visual reference. Not affiliated with EA or Battlefield.</p>
+      <a href="#top">Back to top ↑</a>
+    </footer>
+
+    <template id="scope-card-template">
+      <article class="scope-card">
+        <div class="scope-image-wrap">
+          <img class="scope-image" alt="" loading="lazy" decoding="async" />
+          <div class="image-topline">
+            <span class="point-badge"></span>
+          </div>
+          <button class="expand-button" type="button" aria-label="Open full-size sight picture">
+            <span aria-hidden="true">⛶</span>
+          </button>
+        </div>
+        <div class="scope-card-body">
+          <div class="scope-title-row">
+            <h3 class="scope-name"></h3>
+            <span class="active-zoom"></span>
+          </div>
+          <div class="scope-controls">
+            <div class="zoom-options" aria-label="Available zoom levels"></div>
+            <button class="compare-button" type="button">
+              <span aria-hidden="true">+</span> Compare
+            </button>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <dialog id="image-dialog" class="image-dialog">
+      <form method="dialog">
+        <button class="close-button image-close" value="close" aria-label="Close image">×</button>
+      </form>
+      <img id="expanded-image" alt="" role="button" tabindex="0" title="Click to close" />
+      <div class="expanded-caption">
+        <div class="expanded-title">
+          <span id="expanded-name"></span>
+          <span id="expanded-meta"></span>
+        </div>
+        <div id="expanded-zoom-options" class="expanded-zoom-options" aria-label="Available zoom levels"></div>
+      </div>
+    </dialog>
+
+    <noscript>
+      <div class="noscript">JavaScript is required to build the catalog from the image filenames.</div>
+    </noscript>
+  </body>
+</html>

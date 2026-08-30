@@ -1,0 +1,11 @@
+{
+  "name": "battlefield-6-scopes",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-site.mjs",
+    "manifest": "node scripts/generate-manifest.mjs",
+    "test": "node --test"
+  }
+}
