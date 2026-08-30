@@ -117,10 +117,10 @@ footer a {
 }
 
 .brand-mark {
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--accent);
-  transform: rotate(45deg);
+  display: block;
+  width: 24px;
+  height: 24px;
+  flex: none;
 }
 
 .github-link,
