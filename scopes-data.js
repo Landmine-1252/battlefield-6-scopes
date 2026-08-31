@@ -56,9 +56,9 @@ window.BF6_SCOPE_IMAGES = [
   "36-dvo_lpvo-2x[25].png",
   "36-dvo_lpvo-4x[25].png",
   "36-dvo_lpvo-6x[25].png",
-  "37-sm_rifle_variable-1x[25].png",
   "37-sm_rifle_variable-2x[25].png",
   "37-sm_rifle_variable-4x[25].png",
+  "37-sm_rifle_variable-6x[25].png",
   "37-sm_rifle_variable-8x[25].png",
   "38-ts-hd_6.00x[25].png"
 ];

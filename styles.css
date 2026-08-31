@@ -1,19 +1,21 @@
 :root {
   color-scheme: dark;
-  --bg: #11140f;
-  --surface: #181c16;
-  --surface-high: #20251d;
-  --line: #343b2e;
-  --line-bright: #59634b;
-  --text: #f1f2e9;
-  --muted: #a7ad9d;
-  --muted-strong: #c8cdbf;
-  --accent: #d6f04b;
-  --accent-dark: #202900;
-  --danger: #ff937f;
+  --bg: #0b0e10;
+  --surface: #151a1e;
+  --surface-high: #20262b;
+  --line: #343d44;
+  --line-bright: #65717a;
+  --text: #f4f6f7;
+  --muted: #aeb7bc;
+  --muted-strong: #dce1e3;
+  --accent: #ff6b35;
+  --accent-muted: #a94727;
+  --accent-dark: #180a05;
+  --danger: #ff8a74;
   --header-height: 72px;
-  font-family: Inter, "Arial Narrow", "Roboto Condensed", system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+  font-size: 17px;
   font-synthesis: none;
 }
 
@@ -29,7 +31,11 @@ body {
   min-width: 320px;
   margin: 0;
   color: var(--text);
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 88% -8%, rgba(255, 107, 53, 0.08), transparent 30rem),
+    var(--bg);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -72,7 +78,9 @@ select:focus-visible {
   gap: 32px;
   padding: 16px clamp(20px, 4vw, 64px);
   border-bottom: 1px solid var(--line);
-  background: rgba(17, 20, 15, 0.9);
+  background:
+    linear-gradient(90deg, rgba(255, 107, 53, 0.07), transparent 34%),
+    rgba(11, 14, 16, 0.92);
   backdrop-filter: blur(18px);
 }
 
@@ -97,7 +105,7 @@ select:focus-visible {
   padding-left: 22px;
   border-left: 1px solid var(--line-bright);
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
@@ -112,7 +120,7 @@ footer a {
   align-items: center;
   gap: 12px;
   color: var(--text);
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   font-weight: 800;
   letter-spacing: 0.13em;
 }
@@ -130,7 +138,7 @@ footer a {
 .github-link,
 footer a {
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   transition: color 160ms ease;
 }
 
@@ -168,9 +176,9 @@ dd {
 .sniper-legend {
   margin: 0;
   color: var(--muted);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.76rem;
-  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -193,9 +201,9 @@ dd {
   padding: 0 6px;
   border: 1px solid var(--accent);
   color: var(--accent);
-  background: rgba(8, 10, 7, 0.84);
+  background: rgba(9, 12, 14, 0.9);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.64rem;
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.08em;
 }
@@ -216,7 +224,7 @@ dd {
   margin-bottom: 14px;
   padding: 18px;
   border: 1px solid var(--line);
-  background: rgba(24, 28, 22, 0.82);
+  background: rgba(20, 25, 29, 0.95);
 }
 
 .search-field {
@@ -247,10 +255,11 @@ dd {
   outline: 0;
   color: var(--text);
   background: transparent;
+  font-size: 0.96rem;
 }
 
 .search-field input::placeholder {
-  color: #777f70;
+  color: #89949a;
 }
 
 .point-filter,
@@ -270,9 +279,9 @@ dd {
 .select-field span {
   margin-bottom: 8px;
   color: var(--muted);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
+  font-size: 0.74rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -302,7 +311,7 @@ dd {
   border: 1px solid var(--line-bright);
   color: var(--muted);
   background: transparent;
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   font-weight: 700;
   transition:
     color 140ms ease,
@@ -313,7 +322,7 @@ dd {
 .filter-chip {
   height: 38px;
   padding: 0 13px;
-  font-size: 0.8rem;
+  font-size: 0.88rem;
 }
 
 .filter-chip:hover,
@@ -332,12 +341,13 @@ dd {
 }
 
 .select-field select {
-  height: 35px;
+  height: 38px;
   padding: 0 34px 0 11px;
   border: 1px solid var(--line-bright);
   border-radius: 0;
   color: var(--text);
   background: var(--bg);
+  font-size: 0.9rem;
 }
 
 .display-controls {
@@ -362,12 +372,12 @@ dd {
 }
 
 .view-button {
-  height: 35px;
+  height: 38px;
   padding: 0 13px;
   border: 1px solid var(--line-bright);
   color: var(--muted);
   background: transparent;
-  font-size: 0.74rem;
+  font-size: 0.84rem;
   font-weight: 700;
 }
 
@@ -424,7 +434,7 @@ dd {
 }
 
 .scope-card:hover {
-  border-color: var(--line-bright);
+  border-color: var(--accent-muted);
   transform: translateY(-2px);
 }
 
@@ -432,7 +442,7 @@ dd {
   position: relative;
   overflow: hidden;
   aspect-ratio: 5 / 3;
-  background: #080a07;
+  background: #080a0c;
 }
 
 .scope-image {
@@ -456,7 +466,7 @@ dd {
 }
 
 .scope-grid[data-view="compact"] .scope-card-body {
-  padding: 13px;
+  padding: 14px;
 }
 
 .scope-grid[data-view="compact"] .scope-title-row {
@@ -533,14 +543,13 @@ dd {
 }
 
 .point-badge,
-.active-zoom,
-.compare-button {
+.active-zoom {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-weight: 800;
 }
 
 .point-badge {
-  font-size: 0.74rem;
+  font-size: 0.8rem;
   letter-spacing: 0.08em;
 }
 
@@ -548,7 +557,7 @@ dd {
   margin-left: auto;
   padding: 6px 8px;
   color: var(--text);
-  background: rgba(8, 10, 7, 0.84);
+  background: rgba(9, 12, 14, 0.88);
   backdrop-filter: blur(8px);
 }
 
@@ -566,7 +575,7 @@ dd {
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.28);
   color: white;
-  background: rgba(8, 10, 7, 0.72);
+  background: rgba(9, 12, 14, 0.78);
   opacity: 0;
   transition: opacity 160ms ease;
 }
@@ -606,14 +615,14 @@ dd {
   padding-left: 9px;
   border-left: 2px solid var(--accent);
   color: var(--muted-strong);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
 .scope-name {
   overflow: hidden;
   margin-bottom: 0;
-  font-size: 1.12rem;
+  font-size: 1.2rem;
   font-weight: 850;
   letter-spacing: 0.035em;
   text-overflow: ellipsis;
@@ -629,20 +638,22 @@ dd {
   gap: 4px;
   padding: 7px 9px 8px;
   border: 1px solid var(--accent);
-  background: #0d100b;
+  background: #0c1013;
   line-height: 1;
 }
 
 .active-zoom-label {
   color: var(--muted-strong);
-  font-size: 0.58rem;
-  letter-spacing: 0.1em;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .active-zoom-value {
   color: var(--accent);
-  font-size: 1.38rem;
+  font-size: 1.45rem;
   letter-spacing: -0.025em;
 }
 
@@ -658,8 +669,7 @@ dd {
   margin-right: 3px;
   color: var(--muted-strong);
   content: "Zoom views";
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.66rem;
+  font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -668,14 +678,14 @@ dd {
 .zoom-button {
   height: 38px;
   padding: 0 12px;
-  font-size: 0.88rem;
+  font-size: 0.94rem;
 }
 
 .zoom-options:empty::after {
   align-self: center;
   color: var(--muted);
   content: "Fixed sight";
-  font-size: 0.72rem;
+  font-size: 0.8rem;
 }
 
 .compare-button,
@@ -694,9 +704,10 @@ dd {
   padding: 0 13px;
   border: 1px solid rgba(255, 255, 255, 0.72);
   color: #fff;
-  background: rgba(8, 10, 7, 0.9);
+  background: rgba(9, 12, 14, 0.92);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.38);
-  font-size: 0.78rem;
+  font-size: 0.86rem;
+  font-weight: 800;
   letter-spacing: 0.025em;
   backdrop-filter: blur(8px);
   transition:
@@ -762,7 +773,7 @@ dd {
   margin: auto;
   padding: 11px 12px 11px 18px;
   border: 1px solid var(--line-bright);
-  background: rgba(24, 28, 22, 0.96);
+  background: rgba(20, 25, 29, 0.97);
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(18px);
 }
@@ -783,8 +794,7 @@ dd {
 
 .tray-label {
   color: var(--accent);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.76rem;
+  font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.13em;
 }
@@ -812,7 +822,7 @@ dd {
 
 .tray-item span {
   overflow: hidden;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -824,10 +834,29 @@ dd {
 }
 
 .button {
+  display: inline-flex;
   height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: 0 16px;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   font-weight: 800;
+  transition:
+    color 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease;
+}
+
+.button-icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  stroke-width: 2;
 }
 
 .button-primary {
@@ -835,23 +864,42 @@ dd {
   background: var(--accent);
 }
 
-.button-primary:disabled {
-  cursor: not-allowed;
-  opacity: 0.35;
+.button-primary:not(:disabled):hover {
+  filter: brightness(1.1);
 }
 
+.button-primary:disabled,
+.button-secondary:disabled,
 .button-quiet:disabled {
   cursor: not-allowed;
   opacity: 0.35;
 }
 
+.button-secondary {
+  min-width: 124px;
+  flex: none;
+  border: 1px solid var(--line-bright);
+  color: var(--text);
+  background: var(--surface-high);
+  white-space: nowrap;
+}
+
+.button-secondary:not(:disabled):hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #272b2e;
+}
+
 .button-quiet {
+  border: 1px solid transparent;
   color: var(--muted);
   background: transparent;
 }
 
 .button-quiet:not(:disabled):hover {
-  color: var(--accent);
+  border-color: var(--line);
+  color: var(--text);
+  background: var(--surface-high);
 }
 
 dialog {
@@ -863,7 +911,7 @@ dialog {
   padding: 0;
   border: 0;
   color: var(--text);
-  background: rgba(11, 13, 10, 0.97);
+  background: rgba(9, 12, 14, 0.98);
 }
 
 dialog::backdrop {
@@ -900,7 +948,7 @@ dialog::backdrop {
   border: 1px solid var(--line-bright);
   color: var(--muted-strong);
   background: transparent;
-  font-size: 0.8rem;
+  font-size: 0.86rem;
   font-weight: 800;
 }
 
@@ -965,7 +1013,7 @@ dialog::backdrop {
   flex: 1;
   place-items: center;
   overflow: hidden;
-  background: #060705;
+  background: #07090b;
 }
 
 .compare-panel img {
@@ -1006,7 +1054,7 @@ dialog::backdrop {
 
 .compare-panel-name {
   overflow: hidden;
-  font-size: 1.1rem;
+  font-size: 1.18rem;
   font-weight: 850;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1016,7 +1064,7 @@ dialog::backdrop {
 #expanded-meta {
   color: var(--accent);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.86rem;
+  font-size: 0.92rem;
   font-weight: 750;
   letter-spacing: 0.035em;
 }
@@ -1034,8 +1082,7 @@ dialog::backdrop {
   margin-right: 3px;
   color: var(--muted-strong);
   content: "Zoom views";
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.68rem;
+  font-size: 0.74rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1053,7 +1100,7 @@ dialog::backdrop {
 .compare-hold-view {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
-  background: #060705;
+  background: #07090b;
 }
 
 .compare-slider-stage {
@@ -1061,14 +1108,14 @@ dialog::backdrop {
   position: relative;
   min-height: 0;
   overflow: hidden;
-  background: #060705;
+  background: #07090b;
 }
 
 .compare-hold-stage {
   position: relative;
   min-height: 0;
   overflow: hidden;
-  background: #060705;
+  background: #07090b;
 }
 
 .compare-hold-image {
@@ -1125,9 +1172,9 @@ dialog::backdrop {
 .compare-hold-hint {
   padding: 11px 14px;
   border: 1px solid rgba(255, 255, 255, 0.72);
-  background: rgba(8, 10, 7, 0.9);
+  background: rgba(9, 12, 14, 0.92);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.38);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   font-weight: 800;
   backdrop-filter: blur(8px);
 }
@@ -1161,9 +1208,8 @@ dialog::backdrop {
   overflow: hidden;
   padding: 9px 11px;
   color: white;
-  background: rgba(8, 10, 7, 0.88);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.8rem;
+  background: rgba(9, 12, 14, 0.9);
+  font-size: 0.86rem;
   font-weight: 800;
   letter-spacing: 0.025em;
   text-overflow: ellipsis;
@@ -1268,7 +1314,7 @@ dialog::backdrop {
 }
 
 .image-dialog {
-  background: rgba(5, 6, 5, 0.98);
+  background: rgba(7, 9, 11, 0.99);
 }
 
 .image-dialog form {
@@ -1279,7 +1325,7 @@ dialog::backdrop {
 }
 
 .image-close {
-  background: rgba(8, 10, 7, 0.8);
+  background: rgba(9, 12, 14, 0.86);
 }
 
 .image-dialog img {
@@ -1314,7 +1360,7 @@ dialog::backdrop {
 
 #expanded-note {
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.8rem;
 }
 
 .expanded-zoom-options {
@@ -1341,7 +1387,7 @@ footer {
   border-top: 1px solid var(--line);
   color: var(--muted);
   background: var(--surface);
-  font-size: 0.78rem;
+  font-size: 0.85rem;
 }
 
 footer p {
@@ -1353,7 +1399,7 @@ footer p {
   z-index: 100;
   inset: auto 20px 20px;
   padding: 16px;
-  color: #160f00;
+  color: var(--accent-dark);
   background: var(--accent);
   text-align: center;
 }
@@ -1421,7 +1467,7 @@ footer p {
     max-width: 290px;
     padding-left: 28px;
     border-left: 0;
-    font-size: 0.74rem;
+    font-size: 0.82rem;
   }
 
   .catalog-status {
@@ -1576,7 +1622,7 @@ footer p {
     top: 12px;
     max-width: calc(50% - 24px);
     padding: 7px 8px;
-    font-size: 0.7rem;
+    font-size: 0.76rem;
   }
 
   .compare-slider-label-left {
@@ -1598,7 +1644,7 @@ footer p {
 
   .compare-hold-hint {
     padding: 9px 11px;
-    font-size: 0.76rem;
+    font-size: 0.8rem;
   }
 
   .compare-slider-details {

@@ -7,24 +7,24 @@
       name="description"
       content="View and compare Battlefield 6 scope sight pictures, magnification, and attachment point costs."
     />
-    <meta name="theme-color" content="#11140f" />
+    <meta name="theme-color" content="#0b0e10" />
     <title>Battlefield 6 Scopes</title>
-    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=7" />
+    <link rel="icon" href="favicon.svg?v=3" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=12" />
     <script src="scopes-data.js" defer></script>
-    <script src="app.js?v=11" type="module"></script>
+    <script src="app.js?v=13" type="module"></script>
   </head>
   <body>
     <header class="site-header">
       <div class="header-identity">
         <h1 class="site-title" id="site-title">
           <a class="brand" href="#top" aria-label="Battlefield 6 Scopes home">
-            <img class="brand-mark" src="favicon.svg" alt="" aria-hidden="true" />
+            <img class="brand-mark" src="favicon.svg?v=3" alt="" aria-hidden="true" />
             <span>BATTLEFIELD 6 SCOPES</span>
           </a>
         </h1>
         <p class="header-description">
-          View scope sight pictures the game does not preview, or compare two side by side.
+          View scope sights and compare two side by side.
         </p>
       </div>
       <a
@@ -120,8 +120,20 @@
       </div>
       <div id="tray-items" class="tray-items"></div>
       <div class="tray-actions">
-        <button id="clear-compare" class="button button-quiet" type="button">Clear</button>
-        <button id="copy-compare" class="button button-quiet" type="button" disabled>Copy link</button>
+        <button id="clear-compare" class="button button-quiet" type="button">
+          <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 6 12 12M18 6 6 18"></path>
+          </svg>
+          <span>Clear</span>
+        </button>
+        <button id="copy-compare" class="button button-secondary" type="button" disabled>
+          <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m10.6 13.4 2.8-2.8"></path>
+            <path d="M8.1 17.3 6.7 18.7a4 4 0 0 1-5.6-5.6l3-3a4 4 0 0 1 5.6 0"></path>
+            <path d="m15.9 6.7 1.4-1.4a4 4 0 0 1 5.6 5.6l-3 3a4 4 0 0 1-5.6 0"></path>
+          </svg>
+          <span class="button-label">Copy link</span>
+        </button>
         <button id="open-compare" class="button button-primary" type="button" disabled>
           Compare <span aria-hidden="true">↗</span>
         </button>
@@ -145,7 +157,14 @@
           </button>
         </div>
         <div class="dialog-actions">
-          <button id="dialog-copy-compare" class="button button-quiet" type="button">Copy link</button>
+          <button id="dialog-copy-compare" class="button button-secondary" type="button">
+            <svg class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m10.6 13.4 2.8-2.8"></path>
+              <path d="M8.1 17.3 6.7 18.7a4 4 0 0 1-5.6-5.6l3-3a4 4 0 0 1 5.6 0"></path>
+              <path d="m15.9 6.7 1.4-1.4a4 4 0 0 1 5.6 5.6l-3 3a4 4 0 0 1-5.6 0"></path>
+            </svg>
+            <span class="button-label">Copy link</span>
+          </button>
           <button class="close-button" value="close" aria-label="Close comparison">×</button>
         </div>
       </form>

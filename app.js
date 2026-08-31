@@ -37,6 +37,10 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
     expandedZoomOptions: document.querySelector("#expanded-zoom-options"),
   };
 
+  const SETTINGS_COOKIE = "bf6_scope_settings";
+  const SETTINGS_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+  const preferences = readSettingsCookie();
+
   const state = {
     query: "",
     points: new Set(),
@@ -45,7 +49,7 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
     sort: "default",
     selected: [],
     activeViews: new Map(),
-    compareMode: "side-by-side",
+    compareMode: readPreference("bf6-scopes-compare-mode", "side-by-side"),
     compareSplit: 50,
     view: readPreference("bf6-scopes-view", "compact"),
     pictureSize: Number(readPreference("bf6-scopes-picture-size", "340")),
@@ -63,19 +67,32 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
     return scope.maxZoom >= SNIPER_SCOPE_MIN_ZOOM;
   }
 
-  function readPreference(key, fallback) {
+  function readSettingsCookie() {
     try {
-      return window.localStorage.getItem(key) || fallback;
+      const prefix = `${SETTINGS_COOKIE}=`;
+      const encodedSettings = document.cookie
+        .split("; ")
+        .find((cookie) => cookie.startsWith(prefix))
+        ?.slice(prefix.length);
+      if (!encodedSettings) return {};
+      const settings = JSON.parse(decodeURIComponent(encodedSettings));
+      return settings && typeof settings === "object" ? settings : {};
     } catch {
-      return fallback;
+      return {};
     }
+  }
+
+  function readPreference(key, fallback) {
+    return preferences[key] ?? fallback;
   }
 
   function savePreference(key, value) {
     try {
-      window.localStorage.setItem(key, String(value));
+      preferences[key] = String(value);
+      const encodedSettings = encodeURIComponent(JSON.stringify(preferences));
+      document.cookie = `${SETTINGS_COOKIE}=${encodedSettings}; Max-Age=${SETTINGS_COOKIE_MAX_AGE}; Path=/; SameSite=Lax`;
     } catch {
-      // The view still works when storage is disabled.
+      // The view still works when cookies are disabled.
     }
   }
 
@@ -251,9 +268,12 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
     const uniqueViews = [];
 
     const requestedMode = url.searchParams.get("mode");
-    state.compareMode = ["slider", "hold"].includes(requestedMode)
-      ? requestedMode
-      : "side-by-side";
+    const validModes = ["side-by-side", "slider", "hold"];
+    if (validModes.includes(requestedMode)) {
+      state.compareMode = requestedMode;
+    } else if (values.length > 0 || !validModes.includes(state.compareMode)) {
+      state.compareMode = "side-by-side";
+    }
 
     for (const value of values) {
       const view = viewFromShareValue(value);
@@ -273,7 +293,7 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
     for (const view of state.selected) {
       url.searchParams.append("compare", view.filename);
     }
-    if (state.selected.length === 2 && state.compareMode !== "side-by-side") {
+    if (state.selected.length === 2) {
       url.searchParams.set("mode", state.compareMode);
     }
     window.history.replaceState(null, "", url);
@@ -300,15 +320,21 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
       input.remove();
     }
 
-    const message = copied ? "Link copied" : "Copy the comparison URL from your address bar";
-    elements.shareStatus.textContent = message;
-    elements.copyCompare.textContent = message;
-    elements.dialogCopyCompare.textContent = message;
+    const statusMessage = copied ? "Link copied" : "Copy the comparison URL from your address bar";
+    const buttonMessage = copied ? "Copied" : "Copy failed";
+    elements.shareStatus.textContent = statusMessage;
+    setCopyButtonLabels(buttonMessage);
 
     window.setTimeout(() => {
-      elements.copyCompare.textContent = "Copy link";
-      elements.dialogCopyCompare.textContent = "Copy link";
+      setCopyButtonLabels("Copy link");
     }, 1800);
+  }
+
+  function setCopyButtonLabels(message) {
+    for (const button of [elements.copyCompare, elements.dialogCopyCompare]) {
+      const label = button.querySelector(".button-label");
+      if (label) label.textContent = message;
+    }
   }
 
   function syncCardSelection(card, view) {
@@ -763,8 +789,11 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
 
   elements.pictureSize.addEventListener("input", (event) => {
     state.pictureSize = Number(event.target.value);
-    savePreference("bf6-scopes-picture-size", state.pictureSize);
     applyDisplaySettings();
+  });
+
+  elements.pictureSize.addEventListener("change", () => {
+    savePreference("bf6-scopes-picture-size", state.pictureSize);
   });
 
   elements.sniperToggle.addEventListener("click", () => {
@@ -803,6 +832,7 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
     const button = event.target.closest(".compare-mode-button");
     if (!button || button.dataset.mode === state.compareMode) return;
     state.compareMode = button.dataset.mode;
+    savePreference("bf6-scopes-compare-mode", state.compareMode);
     updateShareUrl();
     renderComparison();
   });
