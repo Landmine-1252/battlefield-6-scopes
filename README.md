@@ -2,7 +2,7 @@
 
 A static visual reference for comparing Battlefield 6 scopes, zoom levels, and attachment-point costs. The site is designed for GitHub Pages and uses the filenames in `images/` as its database.
 
-Selecting two sight pictures updates the page URL with repeated `compare` query parameters. The comparison dialog includes a **Copy link** button, and opening a shared URL restores both selections automatically.
+Selecting two sight pictures updates the page URL with repeated `compare` query parameters. The comparison dialog supports side-by-side, draggable-slider, and press-and-hold views, includes a **Copy link** button, and restores both selections automatically from a shared URL. Shared links also preserve the selected comparison mode.
 
 Variable scopes include magnification controls on each side of the comparison dialog. Changing either side updates the selected sight picture and its shareable URL parameter.
 

@@ -10,9 +10,9 @@
     <meta name="theme-color" content="#11140f" />
     <title>Battlefield 6 Scopes</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=5" />
+    <link rel="stylesheet" href="styles.css?v=7" />
     <script src="scopes-data.js" defer></script>
-    <script src="app.js?v=9" type="module"></script>
+    <script src="app.js?v=11" type="module"></script>
   </head>
   <body>
     <header class="site-header">
@@ -130,15 +130,26 @@
 
     <dialog id="compare-dialog" class="compare-dialog">
       <form method="dialog" class="dialog-bar">
-        <div>
+        <div class="dialog-title">
           <h2>Compare sight pictures</h2>
+        </div>
+        <div id="compare-mode-switch" class="compare-mode-switch" role="group" aria-label="Comparison view">
+          <button class="compare-mode-button" type="button" data-mode="side-by-side" aria-pressed="true">
+            Side by side
+          </button>
+          <button class="compare-mode-button" type="button" data-mode="slider" aria-pressed="false">
+            Slider
+          </button>
+          <button class="compare-mode-button" type="button" data-mode="hold" aria-pressed="false">
+            Press &amp; hold
+          </button>
         </div>
         <div class="dialog-actions">
           <button id="dialog-copy-compare" class="button button-quiet" type="button">Copy link</button>
           <button class="close-button" value="close" aria-label="Close comparison">×</button>
         </div>
       </form>
-      <div id="compare-panels" class="compare-panels"></div>
+      <div id="compare-panels" class="compare-content compare-panels"></div>
     </dialog>
 
     <p id="share-status" class="visually-hidden" aria-live="polite"></p>

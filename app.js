@@ -25,6 +25,7 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
     copyCompare: document.querySelector("#copy-compare"),
     openCompare: document.querySelector("#open-compare"),
     compareDialog: document.querySelector("#compare-dialog"),
+    compareModeSwitch: document.querySelector("#compare-mode-switch"),
     dialogCopyCompare: document.querySelector("#dialog-copy-compare"),
     comparePanels: document.querySelector("#compare-panels"),
     shareStatus: document.querySelector("#share-status"),
@@ -44,6 +45,8 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
     sort: "default",
     selected: [],
     activeViews: new Map(),
+    compareMode: "side-by-side",
+    compareSplit: 50,
     view: readPreference("bf6-scopes-view", "compact"),
     pictureSize: Number(readPreference("bf6-scopes-picture-size", "340")),
   };
@@ -243,8 +246,14 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
   }
 
   function loadComparisonFromUrl() {
-    const values = new URL(window.location.href).searchParams.getAll("compare");
+    const url = new URL(window.location.href);
+    const values = url.searchParams.getAll("compare");
     const uniqueViews = [];
+
+    const requestedMode = url.searchParams.get("mode");
+    state.compareMode = ["slider", "hold"].includes(requestedMode)
+      ? requestedMode
+      : "side-by-side";
 
     for (const value of values) {
       const view = viewFromShareValue(value);
@@ -260,8 +269,12 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
   function updateShareUrl() {
     const url = new URL(window.location.href);
     url.searchParams.delete("compare");
+    url.searchParams.delete("mode");
     for (const view of state.selected) {
       url.searchParams.append("compare", view.filename);
+    }
+    if (state.selected.length === 2 && state.compareMode !== "side-by-side") {
+      url.searchParams.set("mode", state.compareMode);
     }
     window.history.replaceState(null, "", url);
     return url.href;
@@ -439,23 +452,9 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
     elements.trayItems.replaceChildren(...items);
   }
 
-  function updateComparePanel(panel, scope, view) {
-    const image = panel.querySelector("img");
-    image.src = view.src;
-    image.alt = `${view.name} sight picture at ${formatZoom(view.zoom)}`;
-    panel.querySelector(".compare-panel-name").textContent = view.name;
-    panel.querySelector(".compare-panel-meta").textContent =
-      `${formatZoom(view.zoom)} · ${view.points} PTS${isSniperOnly(scope) ? " · SNIPER ONLY" : ""}`;
-
-    for (const button of panel.querySelectorAll(".compare-zoom-options .zoom-button")) {
-      button.setAttribute("aria-pressed", String(button.dataset.filename === view.filename));
-    }
-  }
-
-  function setComparisonView(panel, selectionIndex, scope, view) {
+  function setComparisonView(selectionIndex, scope, view) {
     state.selected[selectionIndex] = view;
     state.activeViews.set(scope.key, view.filename);
-    updateComparePanel(panel, scope, view);
 
     const visibleCard = [...elements.grid.querySelectorAll(".scope-card")].find(
       (card) => card.dataset.scopeKey === scope.key,
@@ -465,11 +464,59 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
     updateShareUrl();
     renderCompareTray();
     updateVisibleCardSelections();
+    renderComparison();
   }
 
-  function openComparison() {
-    if (state.selected.length !== 2) return;
+  function createComparisonInfo(scope, view, selectionIndex) {
+    const info = document.createElement("div");
+    info.className = "compare-info";
+    const summary = document.createElement("div");
+    summary.className = "compare-info-summary";
+    const details = document.createElement("div");
+    details.className = "compare-panel-details";
+    const name = document.createElement("span");
+    name.className = "compare-panel-name";
+    name.textContent = view.name;
+    const meta = document.createElement("span");
+    meta.className = "compare-panel-meta";
+    meta.textContent = `${view.points} PTS${isSniperOnly(scope) ? " · SNIPER ONLY" : ""}`;
+    const activeZoom = document.createElement("span");
+    activeZoom.className = "active-zoom compare-active-zoom";
+    activeZoom.setAttribute("aria-label", `Magnification ${formatZoom(view.zoom)}`);
+    const activeZoomLabel = document.createElement("span");
+    activeZoomLabel.className = "active-zoom-label";
+    activeZoomLabel.setAttribute("aria-hidden", "true");
+    activeZoomLabel.textContent = "Magnification";
+    const activeZoomValue = document.createElement("strong");
+    activeZoomValue.className = "active-zoom-value";
+    activeZoomValue.textContent = formatZoom(view.zoom);
+    const zoomOptions = document.createElement("div");
+    zoomOptions.className = "compare-zoom-options";
+    zoomOptions.setAttribute("aria-label", `Magnification for ${view.name}`);
 
+    if (scope.views.length > 1) {
+      for (const scopeView of scope.views) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "zoom-button";
+        button.dataset.filename = scopeView.filename;
+        button.textContent = formatZoom(scopeView.zoom);
+        button.setAttribute("aria-label", `Compare ${scope.name} at ${formatZoom(scopeView.zoom)}`);
+        button.setAttribute("aria-pressed", String(scopeView.filename === view.filename));
+        button.addEventListener("click", () => setComparisonView(selectionIndex, scope, scopeView));
+        zoomOptions.append(button);
+      }
+    }
+
+    details.append(name, meta);
+    activeZoom.append(activeZoomLabel, activeZoomValue);
+    summary.append(details, activeZoom);
+    info.append(summary, zoomOptions);
+    return info;
+  }
+
+  function renderSideBySideComparison() {
+    elements.comparePanels.className = "compare-content compare-panels";
     const panels = state.selected.map((view, selectionIndex) => {
       const scope = scopes.find((item) => item.key === view.key);
       const figure = document.createElement("figure");
@@ -477,41 +524,178 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
       const imageWrap = document.createElement("div");
       imageWrap.className = "compare-panel-image";
       const image = document.createElement("img");
+      image.src = view.src;
+      image.alt = `${view.name} sight picture at ${formatZoom(view.zoom)}`;
       const caption = document.createElement("figcaption");
-      const details = document.createElement("div");
-      details.className = "compare-panel-details";
-      const name = document.createElement("span");
-      name.className = "compare-panel-name";
-      const meta = document.createElement("span");
-      meta.className = "compare-panel-meta";
-      const zoomOptions = document.createElement("div");
-      zoomOptions.className = "compare-zoom-options";
-      zoomOptions.setAttribute("aria-label", `Magnification for ${view.name}`);
-
-      if (scope?.views.length > 1) {
-        for (const scopeView of scope.views) {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = "zoom-button";
-          button.dataset.filename = scopeView.filename;
-          button.textContent = formatZoom(scopeView.zoom);
-          button.setAttribute("aria-label", `Compare ${scope.name} at ${formatZoom(scopeView.zoom)}`);
-          button.addEventListener("click", () =>
-            setComparisonView(figure, selectionIndex, scope, scopeView),
-          );
-          zoomOptions.append(button);
-        }
-      }
 
       imageWrap.append(image);
-      details.append(name, meta);
-      caption.append(details, zoomOptions);
+      caption.append(createComparisonInfo(scope, view, selectionIndex));
       figure.append(imageWrap, caption);
-      updateComparePanel(figure, scope, view);
       return figure;
     });
-
     elements.comparePanels.replaceChildren(...panels);
+  }
+
+  function renderSliderComparison() {
+    const [leftView, rightView] = state.selected;
+    const leftScope = scopes.find((item) => item.key === leftView.key);
+    const rightScope = scopes.find((item) => item.key === rightView.key);
+    const stage = document.createElement("div");
+    stage.className = "compare-slider-stage";
+    stage.style.setProperty("--compare-split", `${state.compareSplit}%`);
+
+    const leftImage = document.createElement("img");
+    leftImage.className = "compare-slider-image compare-slider-image-left";
+    leftImage.src = leftView.src;
+    leftImage.alt = `${leftView.name} sight picture at ${formatZoom(leftView.zoom)}`;
+    const rightImage = document.createElement("img");
+    rightImage.className = "compare-slider-image compare-slider-image-right";
+    rightImage.src = rightView.src;
+    rightImage.alt = `${rightView.name} sight picture at ${formatZoom(rightView.zoom)}`;
+
+    const leftLabel = document.createElement("span");
+    leftLabel.className = "compare-slider-label compare-slider-label-left";
+    leftLabel.textContent = `${leftView.name} · ${formatZoom(leftView.zoom)}`;
+    const rightLabel = document.createElement("span");
+    rightLabel.className = "compare-slider-label compare-slider-label-right";
+    rightLabel.textContent = `${rightView.name} · ${formatZoom(rightView.zoom)}`;
+
+    const slider = document.createElement("input");
+    slider.className = "compare-slider-input";
+    slider.type = "range";
+    slider.min = "0";
+    slider.max = "100";
+    slider.step = "1";
+    slider.value = String(state.compareSplit);
+    slider.setAttribute("aria-label", `Comparison divider between ${leftView.name} and ${rightView.name}`);
+    slider.setAttribute("aria-valuetext", `Divider at ${state.compareSplit}%`);
+    slider.addEventListener("input", () => {
+      state.compareSplit = Number(slider.value);
+      stage.style.setProperty("--compare-split", `${state.compareSplit}%`);
+      slider.setAttribute("aria-valuetext", `Divider at ${state.compareSplit}%`);
+    });
+
+    const divider = document.createElement("span");
+    divider.className = "compare-slider-divider";
+    divider.setAttribute("aria-hidden", "true");
+    const handle = document.createElement("span");
+    handle.className = "compare-slider-handle";
+    const grip = document.createElement("span");
+    grip.className = "compare-slider-grip";
+    handle.append(grip);
+    divider.append(handle);
+
+    const details = document.createElement("div");
+    details.className = "compare-slider-details";
+    details.append(
+      createComparisonInfo(leftScope, leftView, 0),
+      createComparisonInfo(rightScope, rightView, 1),
+    );
+
+    stage.append(leftImage, rightImage, leftLabel, rightLabel, slider, divider);
+    elements.comparePanels.className = "compare-content compare-slider-view";
+    elements.comparePanels.replaceChildren(stage, details);
+  }
+
+  function renderHoldComparison() {
+    const [defaultView, revealView] = state.selected;
+    const defaultScope = scopes.find((item) => item.key === defaultView.key);
+    const revealScope = scopes.find((item) => item.key === revealView.key);
+    const stage = document.createElement("div");
+    stage.className = "compare-hold-stage";
+
+    const defaultImage = document.createElement("img");
+    defaultImage.className = "compare-hold-image compare-hold-image-default";
+    defaultImage.src = defaultView.src;
+    defaultImage.alt = `${defaultView.name} sight picture at ${formatZoom(defaultView.zoom)}`;
+    const revealImage = document.createElement("img");
+    revealImage.className = "compare-hold-image compare-hold-image-reveal";
+    revealImage.src = revealView.src;
+    revealImage.alt = `${revealView.name} sight picture at ${formatZoom(revealView.zoom)}`;
+
+    const defaultLabel = document.createElement("span");
+    defaultLabel.className = "compare-slider-label compare-hold-label-default";
+    defaultLabel.textContent = `${defaultView.name} · ${formatZoom(defaultView.zoom)}`;
+    const revealLabel = document.createElement("span");
+    revealLabel.className = "compare-slider-label compare-hold-label-reveal";
+    revealLabel.textContent = `${revealView.name} · ${formatZoom(revealView.zoom)}`;
+
+    const control = document.createElement("button");
+    control.className = "compare-hold-control";
+    control.type = "button";
+    control.setAttribute("aria-pressed", "false");
+    control.setAttribute(
+      "aria-label",
+      `Press and hold to reveal ${revealView.name} at ${formatZoom(revealView.zoom)}`,
+    );
+    const hint = document.createElement("span");
+    hint.className = "compare-hold-hint";
+    hint.textContent = `Press and hold to reveal ${revealView.name}`;
+    control.append(hint);
+
+    const setRevealed = (revealed) => {
+      stage.classList.toggle("is-revealed", revealed);
+      control.setAttribute("aria-pressed", String(revealed));
+      hint.textContent = revealed
+        ? `Release to return to ${defaultView.name}`
+        : `Press and hold to reveal ${revealView.name}`;
+    };
+
+    control.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      control.setPointerCapture(event.pointerId);
+      setRevealed(true);
+    });
+    for (const eventName of ["pointerup", "pointercancel", "lostpointercapture"]) {
+      control.addEventListener(eventName, () => setRevealed(false));
+    }
+    control.addEventListener("keydown", (event) => {
+      if ((event.key === " " || event.key === "Enter") && !event.repeat) {
+        event.preventDefault();
+        setRevealed(true);
+      }
+    });
+    control.addEventListener("keyup", (event) => {
+      if (event.key === " " || event.key === "Enter") {
+        event.preventDefault();
+        setRevealed(false);
+      }
+    });
+    control.addEventListener("blur", () => setRevealed(false));
+
+    const details = document.createElement("div");
+    details.className = "compare-slider-details";
+    details.append(
+      createComparisonInfo(defaultScope, defaultView, 0),
+      createComparisonInfo(revealScope, revealView, 1),
+    );
+
+    stage.append(defaultImage, revealImage, defaultLabel, revealLabel, control);
+    elements.comparePanels.className = "compare-content compare-hold-view";
+    elements.comparePanels.replaceChildren(stage, details);
+  }
+
+  function syncCompareModeControls() {
+    for (const button of elements.compareModeSwitch.querySelectorAll(".compare-mode-button")) {
+      button.setAttribute("aria-pressed", String(button.dataset.mode === state.compareMode));
+    }
+  }
+
+  function renderComparison() {
+    if (state.selected.length !== 2) return;
+    syncCompareModeControls();
+    if (state.compareMode === "slider") {
+      renderSliderComparison();
+    } else if (state.compareMode === "hold") {
+      renderHoldComparison();
+    } else {
+      renderSideBySideComparison();
+    }
+  }
+
+  function openComparison() {
+    if (state.selected.length !== 2) return;
+    renderComparison();
     elements.compareDialog.showModal();
   }
 
@@ -615,6 +799,13 @@ import { buildScopes, parseFilename } from "./scope-parser.js?v=4";
   elements.copyCompare.addEventListener("click", copyComparisonLink);
   elements.dialogCopyCompare.addEventListener("click", copyComparisonLink);
   elements.openCompare.addEventListener("click", openComparison);
+  elements.compareModeSwitch.addEventListener("click", (event) => {
+    const button = event.target.closest(".compare-mode-button");
+    if (!button || button.dataset.mode === state.compareMode) return;
+    state.compareMode = button.dataset.mode;
+    updateShareUrl();
+    renderComparison();
+  });
   elements.compareDialog.addEventListener("click", (event) => closeOnBackdrop(elements.compareDialog, event));
   elements.imageDialog.addEventListener("click", (event) => closeOnBackdrop(elements.imageDialog, event));
   elements.expandedImage.addEventListener("click", () => elements.imageDialog.close());
