@@ -1,112 +1,89 @@
-# Battlefield 6 Scopes
+<p align="center">
+  <img src="favicon.svg" width="88" height="88" alt="Battlefield 6 Scopes reticle logo">
+</p>
 
-A static visual reference for comparing Battlefield 6 scopes, zoom levels, and attachment-point costs. The site is designed for GitHub Pages and uses the filenames in `images/` as its database.
+<h1 align="center">Battlefield 6 Scopes</h1>
 
-Selecting two sight pictures updates the page URL with repeated `compare` query parameters. The comparison dialog supports side-by-side, draggable-slider, and press-and-hold views, includes a **Copy link** button, and restores both selections automatically from a shared URL. Shared links also preserve the selected comparison mode.
+<p align="center">Pick two sights. See exactly what changes.</p>
 
-Variable scopes include magnification controls on each side of the comparison dialog. Changing either side updates the selected sight picture and its shareable URL parameter.
+<p align="center">
+  <strong><a href="https://landmine-1252.github.io/battlefield-6-scopes/">OPEN THE SCOPE COMPARISON →</a></strong>
+</p>
 
-The catalog defaults to Compact view and also includes Cards and borderless Images views. A picture-size slider changes the grid density, and the selected layout is remembered in the browser. Variable scopes expose their available zoom views directly in Compact and Cards views. Click a picture to enlarge it, then click the enlarged picture again to close it.
+<p align="center">
+  <img src="images/05-cq_rds_1.25x%5B10%5D.png" width="32%" alt="CQ RDS sight picture">
+  <img src="images/19-pvq-31_4.00x%5B10%5D.png" width="32%" alt="PVQ-31 sight picture">
+  <img src="images/33-r-vps_10.00x.png" width="32%" alt="R-VPS sight picture">
+</p>
 
-Scopes that reach **6× or higher** are marked `SR` because they are restricted to sniper rifles. Hover or focus the badge for an explanation; enlarged and comparison views also show the restriction.
+A quick visual reference for Battlefield 6 optics. Find a scope by name, zoom, or attachment cost, then compare its actual sight picture with another one.
 
-Attachment-point filters can be combined, so users can show sets such as 5+10 or 10+20 points. Selecting **All** clears the point selections. A separate Sniper scopes toggle shows or hides every `SR` scope.
+## What it does
 
-Magnification filters can also be combined. Selecting a magnification shows scopes with a sight picture at that level; for variable scopes, the matching sight picture is selected automatically.
+- Compares two scopes side by side, with a slider, or with press-and-hold
+- Creates shareable links that remember both scopes, zoom levels, and comparison mode
+- Filters by magnification, attachment points, and sniper-only optics
+- Switches between compact, card, and image-first layouts
+- Marks scopes that reach 6× or higher as sniper-rifle only (`SR`)
 
-The default catalog order always pins organizational ID `01` (Basic Sight) first, then follows the in-game attachment-point progression. Regular scopes are grouped before sniper-only scopes; each group is sorted by points, then by magnification.
+No backend and no separate database—the catalog is built from the PNG filenames in [`images/`](images/).
 
-## Image naming
+## Add or fix a scope
 
-The site does not contain a separate scope database. It reads the ID, display name, magnification, and attachment-point cost from each filename in `images/`.
+Corrections and clean replacement captures are welcome. Match the default firing-range position used by the existing images so comparisons stay lined up.
 
-Use one of these formats:
+For a 3440×1440 source screenshot, use this crop:
+
+| | Pixels |
+| --- | ---: |
+| X | 1095 |
+| Y | 345 |
+| Width | 1250 |
+| Height | 750 |
+
+That puts the crop dead center at `1720,720` and leaves enough room for the larger optics.
+
+### File names
 
 ```text
-ID-scope_name_ZOOMx[POINTS].png  # fixed magnification
-ID-scope_name-ZOOMx[POINTS].png  # variable magnification
-ID-scope_name[POINTS].png        # no magnification suffix
+ID-scope_name_ZOOMx[POINTS].png  # fixed zoom
+ID-scope_name-ZOOMx[POINTS].png  # selectable/variable zoom
+ID-scope_name[POINTS].png        # no zoom in the name
 ```
 
-In practice, the final underscore separates a fixed magnification, while the final dash separates a selectable magnification on a variable scope:
+Examples:
 
 ```text
 19-pvq-31_4.00x[10].png
 25-mars-f_lpvo-5x[25].png
-01-basic_sight[5].png
+23-su-230_lpvo-x1[20].png
 ```
 
-More examples:
+The last underscore means fixed zoom; the last dash means a selectable zoom on a variable scope. Files with the same ID and name are grouped together.
 
-```text
-24-1p86_lpvo-4.5x[20].png   # ID 24, 1P86 LPVO, variable 4.5x, 20 points
-25-mars-f_lpvo-5x[25].png   # ID 25, MARS-F LPVO, variable 5x, 25 points
-19-pvq-31_4.00x[10].png     # ID 19, PVQ-31, fixed 4x, 10 points
-23-su-230_lpvo-x1[20].png   # `-x1` is also accepted for a variable 1x view
-```
+- `ID` only controls organization and sorting. It is not shown on the site.
+- Underscores become spaces; hyphens stay visible.
+- Put the attachment cost in brackets. If it is missing, the site uses 10 points.
+- Add one PNG for every selectable zoom level on a variable scope.
+- Sniper-rifle iron sights cost 15 points, so always include `[15]` for those files.
 
-- `ID` is only used to organize and sort the files. It is not an ID from the game and is not displayed on the site.
-- Underscores in the scope name are displayed as spaces.
-- Hyphens inside the scope name remain visible. For example, `pvq-31` displays as `PVQ-31`.
-- A fixed magnification uses a final underscore, such as `_1.50x` or `_4.00x`.
-- A variable scope uses the final dash for each selectable magnification, such as `-1x`, `-4.5x`, or `-x1`.
-- Put the attachment cost in square brackets before the extension, such as `[5]`, `[20]`, or `[25]`.
-- If `[POINTS]` is omitted, the site assumes **10 points**.
-- Files with the same ID and scope name are grouped into one scope with multiple zoom choices.
-- Add one screenshot for every selectable magnification on a variable scope.
+Before opening a pull request, check the scope name, zoom, point cost, and crop in the local site.
 
-### Point-cost exception
+## Run it locally
 
-Iron sights on sniper rifles cost **15 points**. This is a one-off exception because they do not produce scope glint. Include `[15]` in those filenames instead of relying on the normal 10-point default.
+On Windows, double-click `serve-local.bat`, then open <http://localhost:8000>.
 
-## Correcting or adding screenshots
-
-If a scope name, point value, magnification, or sight picture is wrong, corrections and replacement images are welcome. Use the same default firing-range position as the existing screenshots so every sight picture remains directly comparable.
-
-For a **3440×1440** source screenshot, crop this rectangle:
-
-```text
-X:      1095
-Y:       345
-Width:  1250
-Height:  750
-```
-
-This crop has an exact center of **1720,720**. Compared with a 1000×600 crop, it retains approximately 125 extra pixels on each side and 75 extra pixels above and below. The larger crop is preferred because some of the larger Battlefield scopes can otherwise be clipped.
-
-When contributing an image:
-
-1. Enter the firing range and use the default firing-range position shown in the existing captures.
-2. Equip the scope and select the magnification being documented.
-3. Take a full-resolution screenshot without moving from that position.
-4. Apply the 1250×750 crop above when the source is 3440×1440.
-5. Save it as a PNG in `images/` using the filename rules above.
-6. For a replacement, remove the incorrect image so the old and corrected versions are not both included.
-7. Run the site locally and verify the name, zoom, point cost, and crop before opening a pull request.
-
-Add the image, commit, and push to `main`. The GitHub Actions workflow rebuilds the filename manifest and deploys the site automatically.
-
-## Run locally
-
-On Windows, double-click `serve-local.bat`, then open <http://localhost:8000>. Press Ctrl+C in the server window to stop it. If Node.js is installed, the batch file also refreshes the image manifest automatically.
-
-After adding or renaming images, regenerate the manifest before starting the server:
+Or run:
 
 ```bash
 npm run manifest
 python3 -m http.server 8000
 ```
 
-Then open <http://localhost:8000>.
+Use `npm test` for the parser tests and `npm run build` to create the same clean site directory deployed by GitHub Pages.
 
-To build the exact clean directory deployed by GitHub Pages:
+Pushes to `main` rebuild the image manifest and deploy the site automatically. If Pages is not enabled on a fork, choose **Settings → Pages → Source → GitHub Actions**.
 
-```bash
-npm run build
-```
+---
 
-## Enable GitHub Pages
-
-In the repository on GitHub, open **Settings → Pages** and set **Source** to **GitHub Actions**. The site will be available at:
-
-<https://landmine-1252.github.io/battlefield-6-scopes/>
+Community-made and not affiliated with EA or Battlefield.
